@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+        <security>
+            <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+                <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+            </requestedPrivileges>
+        </security>
+    </trustInfo>
+
+    <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+        <application>
+            <supportedOS Id="{e20114e9-71b3-438b-9eb7-39c86a04e505}" />
+            <supportedOS Id="{35138b9a-5d96-4fb0-b1aa-8d4e2489e00f}" />
+            <supportedOS Id="{4a2f28e3-53b9-4993-bc9b-38d5ce4be93d}" />
+            <supportedOS Id="{1fbb0e28-a47e-4d1c-ac52-6ef6d7ef107e}" />
+            <supportedOS Id="{8e0f7a12-bfcd-4f5a-8968-31b18ed4ef65}" />
+        </application>
+    </compatibility>
+
+    <application xmlns="urn:schemas-microsoft-com:asm.v3">
+        <windowsSettings>
+            <dpiAware xmlns="schemas.microsoft.com">true/PM</dpiAware>
+            <dpiAwareness xmlns="schemas.microsoft.com">PerMonitorV2, system</dpiAwareness>
+        </windowsSettings>
+    </application>
+</assembly>

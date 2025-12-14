@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <ApplicationIcon>Images\jarvis.ico</ApplicationIcon>
+        <UseWindowsForms>true</UseWindowsForms>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Jarvis.Google.Plugin\Jarvis.Google.Plugin.csproj" />
+      <ProjectReference Include="..\Jarvis.IIS.Plugin\Jarvis.IIS.Plugin.csproj" />
+      <ProjectReference Include="..\Jarvis.Plugins\Jarvis.Plugins.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="jarvis.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Images\jarvis-e.ico" />
+      <Resource Include="Images\jarvis.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
+    </ItemGroup>
+
+</Project>

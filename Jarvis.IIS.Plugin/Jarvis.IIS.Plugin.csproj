@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Jarvis.Plugins\Jarvis.Plugins.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Images\IIS.png" />
+      <EmbeddedResource Include="Images\IIS.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Management" Version="10.0.1" />
+    </ItemGroup>
+
+</Project>

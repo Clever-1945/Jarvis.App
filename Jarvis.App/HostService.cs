@@ -8,6 +8,6 @@ public class HostService: IHostService
 
     private static void SetTextToClipboardInternal(string text)
     {
-        
+        Clipboard.SetText(text ?? "");
     }
 }

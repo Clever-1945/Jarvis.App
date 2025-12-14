@@ -30,7 +30,8 @@ public static class Assistant
         var t = new Type[]
         {
             typeof(Jarvis.IIS.Plugin.Plugin),
-            typeof(Jarvis.Google.Plugin.Plugin)
+            typeof(Jarvis.Google.Plugin.Plugin),
+            typeof(Jarvis.Tools.Plugin.Plugin)
         };
         IHostService hostService = new HostService();
 

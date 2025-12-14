@@ -41,7 +41,16 @@
             </Grid>
         </Border>
         
-        <ListView Name="ListViewName" Grid.Row="1" Background="#2D2D30" ItemsSource="{Binding ItemPlugins}" MaxHeight="250" BorderThickness="0" MouseUp="OnSelection" HorizontalContentAlignment="Stretch">
+        <ListView 
+            Name="ListViewName" 
+            Grid.Row="1" 
+            Background="#2D2D30" 
+            ItemsSource="{Binding ItemPlugins}" 
+            MaxHeight="250" 
+            BorderThickness="0" 
+            MouseUp="OnSelection"
+            Visibility="{Binding ListViewVisibility}"
+            HorizontalContentAlignment="Stretch">
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type plugins:ItemPlugin}">
                     <local:ControlItemPlugin Item="{Binding}" />

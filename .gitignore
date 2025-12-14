@@ -1,11 +1,5 @@
 .idea/
-Jarvis.App/obj/
-Jarvis.App/bin/
-Jarvis.Google.Plugin/obj/
-Jarvis.Google.Plugin/bin/
-Jarvis.IIS.Plugin/obj/
-Jarvis.IIS.Plugin/bin/
-Jarvis.Plugins/obj/
-Jarvis.Plugins/bin/
+*/obj/
+*/bin/
 
 

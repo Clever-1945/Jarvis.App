@@ -28,6 +28,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     public List<ItemPlugin> ItemPlugins { set; get; } = new List<ItemPlugin>();
 
+    public Visibility ListViewVisibility { set; get; } = Visibility.Collapsed;
+
     public event PropertyChangedEventHandler PropertyChanged;
 
     public MainWindow()
@@ -122,6 +124,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 {
                     ShowItem = OnShowItemPlugin
                 });
+
+                OnShowItemPlugin(null);
             }
         });
     }
@@ -132,11 +136,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             var currentRequestId = CurrentRequestId;
             ItemPlugins = (ItemPlugins ?? new List<ItemPlugin>()).Where(x => x.Request.Id == currentRequestId).ToList();
-            if (pesponse.Item.Request.Id == currentRequestId)
+            if (pesponse?.Item?.Request?.Id == currentRequestId)
             {
                 ItemPlugins.Add(pesponse.Item);
             }
+
+            ListViewVisibility = ItemPlugins.Count < 1 ? Visibility.Collapsed : Visibility.Visible;
             OnPropertyChanged(nameof(ItemPlugins));
+            OnPropertyChanged(nameof(ListViewVisibility));
         });
     }
 

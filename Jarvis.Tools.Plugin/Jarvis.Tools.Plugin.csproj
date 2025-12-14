@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Jarvis.Plugins\Jarvis.Plugins.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Images\uid.jpg" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Images\pngtree-vector-barcode-icon-png-image_1009588.jpg" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Images\uid.png" />
+      <EmbeddedResource Include="Images\uid.png" />
+    </ItemGroup>
+
+</Project>

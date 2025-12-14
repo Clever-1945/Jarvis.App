@@ -6,6 +6,7 @@ using Jarvis.Plugins.Extensions;
 
 namespace Jarvis.IIS.Plugin;
 
+[JPluginInfo("877b9511-83ff-43f9-b612-ddd883bcc079", "IIS помошник", "Поиск номера процесса IIS, с интересным мне проектом")]
 public class Plugin: JItemPlugin
 {
     private byte[] iconData = null;
@@ -19,7 +20,7 @@ public class Plugin: JItemPlugin
 
     public void Request(RequestPlugin request, ResponseProcessor processor)
     {
-        if (!String.Equals(request.Query?.Trim(), "iis", StringComparison.OrdinalIgnoreCase))
+        if (!request.Query.IsEqualsKeyboard("iis"))
             return;
         
         ThreadPool.QueueUserWorkItem((s) =>

@@ -14,6 +14,7 @@
       <ProjectReference Include="..\Jarvis.Google.Plugin\Jarvis.Google.Plugin.csproj" />
       <ProjectReference Include="..\Jarvis.IIS.Plugin\Jarvis.IIS.Plugin.csproj" />
       <ProjectReference Include="..\Jarvis.Plugins\Jarvis.Plugins.csproj" />
+      <ProjectReference Include="..\Jarvis.Tools.Plugin\Jarvis.Tools.Plugin.csproj" />
     </ItemGroup>
 
     <ItemGroup>

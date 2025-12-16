@@ -94,6 +94,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 {
                     this.Show();
                     ProcessingShowWindow();
+                    Request(TextBoxName.Text);
                 });
             
             ProcessingShowWindow();
@@ -108,10 +109,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OnTextChange(object sender, TextChangedEventArgs e)
     {
+        Request(TextBoxName.Text);
+    }
+
+    private void Request(string request)
+    {
         var requestId = Guid.NewGuid();
         CurrentRequestId = requestId;
         var plugins = Assistant.GetPlugins();
-        var request = TextBoxName.Text;
         ThreadPool.QueueUserWorkItem((s) =>
         {
             foreach (var plugin in plugins)

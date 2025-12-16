@@ -28,11 +28,12 @@ public class Plugin: JItemPlugin
             var processes = Process.GetProcesses().Where(x =>
                     String.Equals(x.ProcessName, "w3wp", StringComparison.OrdinalIgnoreCase) ||
                     String.Equals(x.ProcessName, "w3wp.exe", StringComparison.OrdinalIgnoreCase))
+                .Select(x => GetProcessDefinition(x))
+                .OrderBy(x => x.Owner)
                 .ToArray();
 
-            foreach (var process in processes)
+            foreach (var definition in processes)
             {
-                var definition = GetProcessDefinition(process);
                 var text = $"[{definition.Id}] {definition.Name} ( {(definition.Owner ?? "")} )";
                 var description = "";
                 if (definition.Exceptions?.Length > 0)
@@ -58,7 +59,7 @@ public class Plugin: JItemPlugin
                             var definition = i?.Data as ProcessDefinition;
                             if (definition != null)
                             {
-                                _hostService?.SetTextToClipboard?.Invoke(definition.Id.ToString());
+                                _hostService?.SetTextToClipboard(definition.Id.ToString());
                             }
                         }
                     }

@@ -46,14 +46,17 @@
             Grid.Row="1" 
             Background="#2D2D30" 
             ItemsSource="{Binding ItemPlugins}" 
-            MaxHeight="250" 
+            MaxHeight="350" 
             BorderThickness="0" 
             MouseUp="OnSelection"
             Visibility="{Binding ListViewVisibility}"
-            HorizontalContentAlignment="Stretch">
+            HorizontalContentAlignment="Stretch"
+            ScrollViewer.VerticalScrollBarVisibility="Hidden"
+            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+            >
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type plugins:ItemPlugin}">
-                    <local:ControlItemPlugin Item="{Binding}" />
+                    <local:ControlItemPlugin Item="{Binding}"  />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

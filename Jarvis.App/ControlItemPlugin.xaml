@@ -8,7 +8,6 @@
     xmlns:local="clr-namespace:Jarvis.App"
     mc:Ignorable="d"
     Height="50"
-    Width="635"
 >
     <Grid>
         <Grid.RowDefinitions>
@@ -25,24 +24,21 @@
             Grid.Row="0" 
             Grid.Column="1" 
             Padding="2"
-            Name="TextBlockNameName" 
             Text="{Binding 
             ElementName=ThisUserControl, Path=Item.Text}" 
             Foreground="Cornsilk" 
             FontSize="18"
             TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap"
             ></TextBlock>
         
         <TextBlock 
             Grid.Row="1" 
             Grid.Column="1" 
-            Padding="2" 
-            Name="TextBlockDescriptionName" 
             Foreground="Cornsilk" 
             Text="{Binding ElementName=ThisUserControl, Path=Item.Description}"
             TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap"
             ></TextBlock>
-        
-        
     </Grid>
 </UserControl>

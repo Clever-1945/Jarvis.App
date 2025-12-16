@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Windows;
 using System.Windows.Forms; // Используем пространство имен Forms
 using Application = System.Windows.Application;
@@ -18,10 +19,10 @@ public partial class App : Application
     {
         base.OnStartup(e);
         _notifyIcon = new NotifyIcon();
-        using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("Jarvis.App.Images.jarvis-e.ico"))
-        {
-            _notifyIcon.Icon = new Icon(stream);
-        }
+
+        var iconUri = new Uri("pack://application:,,,/Images/jarvis.ico", UriKind.Absolute);
+        var info = Application.GetResourceStream(iconUri);
+        _notifyIcon.Icon = new Icon(info.Stream);
 
         _notifyIcon.Text = "Jarvis";
         _notifyIcon.Visible = true;

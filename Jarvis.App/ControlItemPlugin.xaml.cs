@@ -1,8 +1,10 @@
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Jarvis.App.Extensions;
 using Jarvis.Plugins;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -30,28 +32,10 @@ public partial class ControlItemPlugin : UserControl
                 if (control != null)
                 {
                     var iconData = control.Item?.IconData;
-                    control.ImageName.Source = control.ConvertByteArrayToImageSource(iconData);
+                    control.ImageName.Source = iconData.ConvertByteArrayToImageSource();
                 }
             })
         );
-    }
-    
-    private ImageSource ConvertByteArrayToImageSource(byte[] imageData)
-    {
-        if (imageData == null || imageData.Length == 0)
-            return null;
-
-        MemoryStream ms = new MemoryStream(imageData);
-
-        BitmapImage biImg = new BitmapImage();
-        biImg.BeginInit();
-        biImg.StreamSource = ms;
-        
-        biImg.CacheOption = BitmapCacheOption.OnLoad;
-        biImg.EndInit();
-    
-        biImg.Freeze(); 
-        return biImg;
     }
 
     public ItemPlugin Item

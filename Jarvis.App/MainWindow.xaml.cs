@@ -86,6 +86,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         try
         {
+            Assistant.ReloadAppSettings();
+            Assistant.StartLoadPlugins();
+            
             HotkeyManager.Current.AddOrReplace(
                 "ShowCommand",
                 Key.Space,
@@ -117,11 +120,15 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var requestId = Guid.NewGuid();
         CurrentRequestId = requestId;
         var plugins = Assistant.GetPlugins();
+        var listSkipPlugins = Assistant.ListSkipPlugins;
         ThreadPool.QueueUserWorkItem((s) =>
         {
             foreach (var plugin in plugins)
             {
-                plugin.Request(new RequestPlugin()
+                if (listSkipPlugins != null && listSkipPlugins.Contains(plugin.Id))
+                    continue;
+                
+                plugin.Instance.Request(new RequestPlugin()
                 {
                     Id = requestId,
                     Query = request

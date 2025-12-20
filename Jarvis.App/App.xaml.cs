@@ -2,8 +2,11 @@
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Windows;
-using System.Windows.Forms; // Используем пространство имен Forms
+using System.Windows.Forms;
+using Jarvis.App.Extensions;
+using Jarvis.App.Settings;
 using Application = System.Windows.Application;
 
 namespace Jarvis.App;
@@ -26,18 +29,26 @@ public partial class App : Application
 
         _notifyIcon.Text = "Jarvis";
         _notifyIcon.Visible = true;
-
-        ToolStripMenuItem exitMenuItem = new ToolStripMenuItem();
-        exitMenuItem.Text = "&Выход";
-        exitMenuItem.Click += new EventHandler(OnClickExit);
-
         _notifyIcon.ContextMenuStrip = new ContextMenuStrip();
-        _notifyIcon.ContextMenuStrip.Items.AddRange(new ToolStripItem[] {
-            exitMenuItem
-        });
+        _notifyIcon.ContextMenuStrip.Items.Add("&Настройки", OnClickSettings);
+        _notifyIcon.ContextMenuStrip.Items.Add("&Выход", OnClickExit);
     }
 
-    private void OnClickExit(object sender, EventArgs e)
+    private void OnClickSettings()
+    {
+        var window = new SettingsWindow();
+        window.ShowDialog();
+        if (window.IsOk)
+        {
+            Assistant.InTransaction((db) =>
+            {
+                Assistant.SaveAppSettings(window.Settings, db);
+                Assistant.ReloadAppSettings(db);
+            });
+        }
+    }
+    
+    private void OnClickExit()
     {
         _notifyIcon?.Dispose();
         _notifyIcon = null;

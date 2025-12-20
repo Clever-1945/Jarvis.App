@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Management;
-using System.Windows;
 using Jarvis.Plugins;
 using Jarvis.Plugins.Extensions;
 

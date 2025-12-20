@@ -10,11 +10,16 @@
         <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>..\bin\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <OutputPath>..\bin\</OutputPath>
+    </PropertyGroup>
+
     <ItemGroup>
-      <ProjectReference Include="..\Jarvis.Google.Plugin\Jarvis.Google.Plugin.csproj" />
-      <ProjectReference Include="..\Jarvis.IIS.Plugin\Jarvis.IIS.Plugin.csproj" />
       <ProjectReference Include="..\Jarvis.Plugins\Jarvis.Plugins.csproj" />
-      <ProjectReference Include="..\Jarvis.Tools.Plugin\Jarvis.Tools.Plugin.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -26,7 +31,16 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="LiteDB" Version="5.0.21" />
       <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="Settings\SettingsWindow.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <XamlRuntime>Wpf</XamlRuntime>
+        <SubType>Designer</SubType>
+      </Page>
     </ItemGroup>
 
 </Project>

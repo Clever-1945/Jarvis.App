@@ -1,61 +1,166 @@
-using System.Diagnostics;
-using System.DirectoryServices.ActiveDirectory;
 using System.IO;
-using System.Windows;
+using System.Reflection;
+using System.Runtime.Loader;
+using System.Security.Cryptography;
+using System.Text;
+using Jarvis.App.Settings;
 using Jarvis.Plugins;
+using LiteDB;
 
 namespace Jarvis.App;
 
-
-//IHostService
 public static class Assistant
 {
     public static string ApplicationFileName { get; } = typeof(Assistant).Assembly.Location;
     public static string ApplicationPath { get; } = Path.GetDirectoryName(ApplicationFileName);
 
-    private static JItemPlugin[] _plugins = null;
+    private static JarvisPluginDescription[] _plugins = new JarvisPluginDescription[] { };
+    private static object lock_db = new object();
+    
+    public static AppSettings Settings { private set; get; }
+    
+    public static HashSet<Guid> ListSkipPlugins { private set; get; }
 
-    public static JItemPlugin[] GetPlugins()
+    public static JarvisPluginDescription[] GetPlugins() => _plugins;
+
+    public static void StartLoadPlugins()
     {
-        if (_plugins == null)
+        IHostService hostService = new HostService();
+        
+        ThreadPool.QueueUserWorkItem((s) =>
         {
-            _plugins = GetPluginsInternal().ToArray();
-        }
+            var listLocationPlugin = new string[]
+            {
+                Path.Combine(ApplicationPath, "Plugins"),
+                Path.Combine(ApplicationPath, "..", "Plugins")
+            };
+#if DEBUG
+            
+#else
+            listLocationPlugin = listLocationPlugin.Take(1).ToArray();
+#endif
 
-        return _plugins;
+            var dictionaryPlugin = new Dictionary<Guid, JarvisPluginDescription>();
+
+            foreach (var locationPlugin in listLocationPlugin)
+            {
+                if (!Directory.Exists(locationPlugin))
+                    continue;
+
+                var alc = new AssemblyLoadContext("ProcessorLoadAssembly", isCollectible: true);
+                var files = new DirectoryInfo(locationPlugin).GetFiles("*.dll", SearchOption.AllDirectories);
+                
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        {
+                            var typePlugin = alc.LoadFromAssemblyPath(file.FullName)
+                                .GetTypes()
+                                .Where(x => x.GetInterfaces().Contains(typeof(JItemPlugin)))
+                                .ToArray();
+                        }
+
+                        {
+                            var assembly = Assembly.LoadFrom(file.FullName);
+
+                            var listTypePlugin = assembly
+                                .GetTypes()
+                                .Where(x => x.GetInterfaces().Contains(typeof(JItemPlugin)))
+                                .ToArray();
+
+                            foreach (var typePlugin in listTypePlugin)
+                            {
+                                var description = GetPluginDescription(typePlugin, hostService);
+                                if (description != null)
+                                {
+                                    dictionaryPlugin[description.Id] = description;
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    
+                    }
+                }
+                
+                alc.Unload();
+            }
+            
+            _plugins = dictionaryPlugin.Values.ToArray();
+        });
     }
 
-    private static IEnumerable<JItemPlugin> GetPluginsInternal()
+    private static JarvisPluginDescription GetPluginDescription(Type typePlugin, IHostService hostService)
     {
-        var t = new Type[]
+        var instance = Activator.CreateInstance(typePlugin) as JItemPlugin;
+        if (instance != null)
         {
-            typeof(Jarvis.IIS.Plugin.Plugin),
-            typeof(Jarvis.Google.Plugin.Plugin),
-            typeof(Jarvis.Tools.Plugin.Plugin)
-        };
-        IHostService hostService = new HostService();
-
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            foreach (var type in assembly.GetTypes())
+            instance.Init(hostService);
+            
+            var info = typePlugin.GetCustomAttribute<JPluginInfoAttribute>();
+            
+            string name = info?.Name ?? typePlugin.Name;
+            string description = info?.Description ?? $"{typePlugin.Namespace}.{typePlugin.Name}";
+            Guid id = info?.Id ?? Guid.Empty;
+            if (id == Guid.Empty)
             {
-                if (type.GetInterfaces().Contains(typeof(JItemPlugin)))
+                var list = File.ReadAllBytes(typePlugin.Assembly.Location).ToList();
+                list.Add((byte)0);
+                list.Add((byte)0);
+                list.Add((byte)0);
+                list.AddRange(Encoding.UTF8.GetBytes($"{typePlugin.Namespace}.{typePlugin.Name}"));
+                
+                byte[] hashBytes = MD5.HashData(list.ToArray());
+                id = new Guid(hashBytes);
+            }
+
+            return new JarvisPluginDescription(id, name, description, instance);
+        }
+
+        return null;
+    }
+
+    public static void InTransaction(Action<LiteDatabase> action, LiteDatabase db = null)
+    {
+        if (db == null)
+        {
+            lock (lock_db)
+            {
+                using (db = new LiteDatabase(Path.Combine(ApplicationPath, "data.db")))
                 {
-                    var plugin = Activator.CreateInstance(type) as JItemPlugin;
-                    if (plugin != null)
-                    {
-                        try
-                        {
-                            plugin.Init(hostService);
-                        }
-                        catch (Exception e)
-                        {
-                        }
-                        
-                        yield return plugin;
-                    }
+                    action?.Invoke(db);
                 }
             }
         }
+        else
+        {
+            action?.Invoke(db);
+        }
+    }
+
+    /// <summary> Загрузить настройки из базы данных </summary>
+    public static void ReloadAppSettings(LiteDatabase db = null)
+    {
+        InTransaction((db) =>
+        {
+            Settings = db.GetCollection<AppSettings>().FindAll().FirstOrDefault();
+            var listSkipPlugins = Settings?.Plugins?.Where(x => x.IsDisabled)?.Select(x => x.Id)?.ToArray();
+            ListSkipPlugins = new HashSet<Guid>(listSkipPlugins ?? Array.Empty<Guid>());
+        }, db);
+    }
+    
+    /// <summary> Сохранить настройки из базы данных </summary>
+    public static void SaveAppSettings(AppSettings settings, LiteDatabase db = null)
+    {
+        InTransaction((db) =>
+        {
+            if (settings != null)
+            {
+                db.GetCollection<AppSettings>().DeleteAll();
+                db.GetCollection<AppSettings>().Insert(settings);
+            }
+        }, db);
     }
 }

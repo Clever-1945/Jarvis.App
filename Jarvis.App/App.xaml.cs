@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -45,6 +46,41 @@ public partial class App : Application
                 Assistant.SaveAppSettings(window.Settings, db);
                 Assistant.ReloadAppSettings(db);
             });
+
+            var appData= Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var startup = new DirectoryInfo(Path.Combine(appData, "Microsoft", "Windows", "Start Menu", "Programs", "Startup"));
+            var location = this.GetType().Assembly.Location;
+            var shortcutPath = Path.Combine(startup.FullName, Path.GetFileNameWithoutExtension(location) + ".lnk");
+            
+            if (File.Exists(shortcutPath))
+            {
+                File.Delete(shortcutPath);
+            }
+            
+            if (window.Settings.AutoStart)
+            {
+                var locationDirectory = Path.GetDirectoryName(location);
+                var targetPath = $"{Path.Combine(locationDirectory, Path.GetFileNameWithoutExtension(location) + ".exe")}";
+            
+                string script = $"$s=(New-Object -ComObject WScript.Shell).CreateShortcut('{shortcutPath}')";
+                script += $";$s.TargetPath='{targetPath}'";
+                script += $";$s.Arguments='--autoStart'";
+                script += $";$s.WorkingDirectory='{Path.GetDirectoryName(targetPath)}'";
+                script += $";$s.IconLocation='{targetPath}'";
+                script += $";$s.Save()";
+                
+                Process.Start(new ProcessStartInfo {
+                    FileName = "powershell",
+                    Arguments = $"-Command \"{script}\"",
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                });
+            }
+            
+            
+            
+            
+            // cd %appdata%\Microsoft\Windows\Start Menu\Programs\Startup
         }
     }
     

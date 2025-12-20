@@ -88,7 +88,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             Assistant.ReloadAppSettings();
             Assistant.StartLoadPlugins();
-            
+
             HotkeyManager.Current.AddOrReplace(
                 "ShowCommand",
                 Key.Space,
@@ -99,6 +99,15 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     ProcessingShowWindow();
                     Request(TextBoxName.Text);
                 });
+
+            string[] args = Environment.GetCommandLineArgs();
+            if (args?.Contains("--autoStart", StringComparer.OrdinalIgnoreCase) == true)
+            {
+                if (Assistant.Settings?.ShowDialogIfAutoStart != true)
+                {
+                    this.Hide();
+                }
+            }
             
             ProcessingShowWindow();
         }

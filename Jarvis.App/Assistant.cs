@@ -106,13 +106,11 @@ public static class Assistant
             Guid id = info?.Id ?? Guid.Empty;
             if (id == Guid.Empty)
             {
-                var list = File.ReadAllBytes(typePlugin.Assembly.Location).ToList();
-                list.Add((byte)0);
-                list.Add((byte)0);
-                list.Add((byte)0);
-                list.AddRange(Encoding.UTF8.GetBytes($"{typePlugin.Namespace}.{typePlugin.Name}"));
-                
-                byte[] hashBytes = MD5.HashData(list.ToArray());
+                var hashAssembly = MD5.HashData(File.ReadAllBytes(typePlugin.Assembly.Location));
+                var uidAssembly = new Guid(hashAssembly);
+                var hashType = $"{uidAssembly}.{typePlugin.Namespace}.{typePlugin.Name}";
+
+                byte[] hashBytes = MD5.HashData(Encoding.UTF8.GetBytes(hashType));
                 id = new Guid(hashBytes);
             }
 

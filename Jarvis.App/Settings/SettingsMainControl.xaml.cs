@@ -1,9 +1,10 @@
 using System.Windows;
+using System.Windows.Controls;
 
 
 namespace Jarvis.App.Settings;
 
-public partial class SettingsMainControl : System.Windows.Controls.UserControl
+public partial class SettingsMainControl : UserControl
 {
     public static readonly DependencyProperty SettingsProperty;
     

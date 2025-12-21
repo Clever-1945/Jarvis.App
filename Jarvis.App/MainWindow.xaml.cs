@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Jarvis.ContextMenu;
 using Jarvis.Plugins;
 using NHotkey.Wpf;
 using Application = System.Windows.Application;
@@ -44,11 +45,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             this.Hide();
         }), new KeyGesture(Key.Escape)));
-        
-        InputBindings.Add(new KeyBinding(new ActionCommand(() =>
-        {
-            
-        }), new KeyGesture(Key.V, ModifierKeys.Control)));
+
+        Assistant.ReloadAppSettings();
+        Assistant.LoadPlugins();
     }
     
     protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -81,14 +80,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         this.Activate();
         TextBoxName.Focus();
     }
-    
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         try
         {
-            Assistant.ReloadAppSettings();
-            Assistant.StartLoadPlugins();
-
             HotkeyManager.Current.AddOrReplace(
                 "ShowCommand",
                 Key.Space,
@@ -99,24 +95,32 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     ProcessingShowWindow();
                     Request(TextBoxName.Text);
                 });
-
-            string[] args = Environment.GetCommandLineArgs();
-            if (args?.Contains("--autoStart", StringComparer.OrdinalIgnoreCase) == true)
-            {
-                if (Assistant.Settings?.ShowDialogIfAutoStart != true)
-                {
-                    this.Hide();
-                }
-            }
-            
-            ProcessingShowWindow();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace, this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace, this.Title, MessageBoxButton.OK,
+                MessageBoxImage.Error);
             Application.Current.Shutdown();
             this.Close();
         }
+
+        ProcessingShowWindow();
+
+        string[] args = Environment.GetCommandLineArgs();
+        if (args?.Contains("--autoStart", StringComparer.OrdinalIgnoreCase) == true)
+        {
+            if (Assistant.Settings?.ShowDialogIfAutoStart != true)
+            {
+                this.Hide();
+            }
+        }
+        
+        TreeIcon.Insert(0, "&Открыть", () =>
+        {
+            this.Show();
+            ProcessingShowWindow();
+            Request(TextBoxName.Text);
+        });
     }
 
     private void OnTextChange(object sender, TextChangedEventArgs e)

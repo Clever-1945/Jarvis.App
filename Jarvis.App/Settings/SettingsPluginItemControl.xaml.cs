@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Jarvis.App.Extensions;
 using Image = System.Drawing.Image;
-using UserControl = System.Windows.Controls.UserControl;
+
 
 namespace Jarvis.App.Settings;
 

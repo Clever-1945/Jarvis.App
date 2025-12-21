@@ -6,7 +6,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Jarvis.App.Extensions;
 using Jarvis.Plugins;
-using UserControl = System.Windows.Controls.UserControl;
 
 
 namespace Jarvis.App;

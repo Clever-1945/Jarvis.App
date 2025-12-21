@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using UserControl = System.Windows.Controls.UserControl;
 
 namespace Jarvis.App.Settings;
 

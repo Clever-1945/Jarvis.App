@@ -23,73 +23,69 @@ public static class Assistant
 
     public static JarvisPluginDescription[] GetPlugins() => _plugins;
 
-    public static void StartLoadPlugins()
+    public static void LoadPlugins()
     {
         IHostService hostService = new HostService();
-        
-        ThreadPool.QueueUserWorkItem((s) =>
+
+        var listLocationPlugin = new string[]
         {
-            var listLocationPlugin = new string[]
-            {
-                Path.Combine(ApplicationPath, "Plugins"),
-                Path.Combine(ApplicationPath, "..", "Plugins")
-            };
+            Path.Combine(ApplicationPath, "Plugins"),
+            Path.Combine(ApplicationPath, "..", "Plugins")
+        };
 #if DEBUG
-            
+
 #else
-            listLocationPlugin = listLocationPlugin.Take(1).ToArray();
+        listLocationPlugin = listLocationPlugin.Take(1).ToArray();
 #endif
 
-            var dictionaryPlugin = new Dictionary<Guid, JarvisPluginDescription>();
+        var dictionaryPlugin = new Dictionary<Guid, JarvisPluginDescription>();
 
-            foreach (var locationPlugin in listLocationPlugin)
+        foreach (var locationPlugin in listLocationPlugin)
+        {
+            if (!Directory.Exists(locationPlugin))
+                continue;
+
+            var alc = new AssemblyLoadContext("ProcessorLoadAssembly", isCollectible: true);
+            var files = new DirectoryInfo(locationPlugin).GetFiles("*.dll", SearchOption.AllDirectories);
+
+            foreach (var file in files)
             {
-                if (!Directory.Exists(locationPlugin))
-                    continue;
-
-                var alc = new AssemblyLoadContext("ProcessorLoadAssembly", isCollectible: true);
-                var files = new DirectoryInfo(locationPlugin).GetFiles("*.dll", SearchOption.AllDirectories);
-                
-                foreach (var file in files)
+                try
                 {
-                    try
                     {
+                        var typePlugin = alc.LoadFromAssemblyPath(file.FullName)
+                            .GetTypes()
+                            .Where(x => x.GetInterfaces().Contains(typeof(JItemPlugin)))
+                            .ToArray();
+                    }
+
+                    {
+                        var assembly = Assembly.LoadFrom(file.FullName);
+
+                        var listTypePlugin = assembly
+                            .GetTypes()
+                            .Where(x => x.GetInterfaces().Contains(typeof(JItemPlugin)))
+                            .ToArray();
+
+                        foreach (var typePlugin in listTypePlugin)
                         {
-                            var typePlugin = alc.LoadFromAssemblyPath(file.FullName)
-                                .GetTypes()
-                                .Where(x => x.GetInterfaces().Contains(typeof(JItemPlugin)))
-                                .ToArray();
-                        }
-
-                        {
-                            var assembly = Assembly.LoadFrom(file.FullName);
-
-                            var listTypePlugin = assembly
-                                .GetTypes()
-                                .Where(x => x.GetInterfaces().Contains(typeof(JItemPlugin)))
-                                .ToArray();
-
-                            foreach (var typePlugin in listTypePlugin)
+                            var description = GetPluginDescription(typePlugin, hostService);
+                            if (description != null)
                             {
-                                var description = GetPluginDescription(typePlugin, hostService);
-                                if (description != null)
-                                {
-                                    dictionaryPlugin[description.Id] = description;
-                                }
+                                dictionaryPlugin[description.Id] = description;
                             }
                         }
                     }
-                    catch
-                    {
-                    
-                    }
                 }
-                
-                alc.Unload();
+                catch
+                {
+                }
             }
-            
-            _plugins = dictionaryPlugin.Values.ToArray();
-        });
+
+            alc.Unload();
+        }
+
+        _plugins = dictionaryPlugin.Values.ToArray();
     }
 
     private static JarvisPluginDescription GetPluginDescription(Type typePlugin, IHostService hostService)

@@ -1,3 +1,4 @@
+using System.Windows;
 using Jarvis.Plugins;
 
 namespace Jarvis.App;

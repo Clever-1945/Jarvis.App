@@ -6,7 +6,7 @@ using Jarvis.App.Extensions;
 
 namespace Jarvis.App.Settings;
 
-public partial class SettingsPluginsControl : System.Windows.Controls.UserControl, INotifyPropertyChanged
+public partial class SettingsPluginsControl : UserControl, INotifyPropertyChanged
 {
     public static readonly DependencyProperty SettingsProperty;
     public event PropertyChangedEventHandler PropertyChanged;

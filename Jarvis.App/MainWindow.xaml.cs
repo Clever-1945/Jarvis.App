@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
@@ -10,13 +12,15 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Jarvis.App.Definitions;
+using Jarvis.App.Settings;
 using Jarvis.ContextMenu;
 using Jarvis.Plugins;
 using NHotkey.Wpf;
 using Application = System.Windows.Application;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MessageBox = System.Windows.MessageBox;
+using Path = System.Windows.Shapes.Path;
 
 namespace Jarvis.App;
 
@@ -32,6 +36,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     public Visibility ListViewVisibility { set; get; } = Visibility.Collapsed;
 
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    private const string NameCommandShow = "Jarvis.App.Command.Show";
 
     public MainWindow()
     {
@@ -85,23 +91,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         try
         {
-            HotkeyManager.Current.AddOrReplace(
-                "ShowCommand",
-                Key.Space,
-                ModifierKeys.Alt,
-                (o, args) =>
-                {
-                    this.Show();
-                    ProcessingShowWindow();
-                    Request(TextBoxName.Text);
-                });
+            ApplyHotkey(Assistant.Settings);
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace, this.Title, MessageBoxButton.OK,
-                MessageBoxImage.Error);
-            Application.Current.Shutdown();
-            this.Close();
+            MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace, this.Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         ProcessingShowWindow();
@@ -115,12 +109,39 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             }
         }
         
+        TreeIcon.Insert(0, "&Выход", OnClickExit);
+        TreeIcon.Insert(0, "&Настройки", OnClickSettings);
         TreeIcon.Insert(0, "&Открыть", () =>
         {
             this.Show();
             ProcessingShowWindow();
             Request(TextBoxName.Text);
         });
+    }
+
+    private void ApplyHotkey(AppSettings settings)
+    {
+        var definition = new HotKeyDefinition(settings?.ShowHotKey);
+        var modifierKeys = definition.GetModifierKeys();
+        var key = definition.GetKey();
+        if (key != null && modifierKeys != null)
+        {
+            CreateHotkey(key.Value, modifierKeys.Value);
+        }
+    }
+    
+    private void CreateHotkey(Key key, ModifierKeys modifierKeys)
+    {
+        HotkeyManager.Current.AddOrReplace(
+            NameCommandShow,
+            key,
+            modifierKeys,
+            (o, args) =>
+            {
+                this.Show();
+                ProcessingShowWindow();
+                Request(TextBoxName.Text);
+            });
     }
 
     private void OnTextChange(object sender, TextChangedEventArgs e)
@@ -237,5 +258,60 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void OnSelection(object sender, MouseButtonEventArgs mouseButtonEventArgs)
     {
         ActivateItem();
+    }
+    
+    private void OnClickSettings()
+    {
+        var window = new SettingsWindow();
+        HotkeyManager.Current.Remove(NameCommandShow);
+        window.ShowDialog();
+        if (window.IsOk)
+        {
+            ApplyHotkey(window.Settings);
+            Assistant.InTransaction((db) =>
+            {
+                Assistant.SaveAppSettings(window.Settings, db);
+                Assistant.ReloadAppSettings(db);
+            });
+
+            var appData= Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var startup = new DirectoryInfo(System.IO.Path.Combine(appData, "Microsoft", "Windows", "Start Menu", "Programs", "Startup"));
+            var location = this.GetType().Assembly.Location;
+            var shortcutPath = System.IO.Path.Combine(startup.FullName, System.IO.Path.GetFileNameWithoutExtension(location) + ".lnk");
+            
+            if (File.Exists(shortcutPath))
+            {
+                File.Delete(shortcutPath);
+            }
+            
+            if (window.Settings.AutoStart)
+            {
+                var locationDirectory = System.IO.Path.GetDirectoryName(location);
+                var targetPath = $"{System.IO.Path.Combine(locationDirectory, System.IO.Path.GetFileNameWithoutExtension(location) + ".exe")}";
+            
+                string script = $"$s=(New-Object -ComObject WScript.Shell).CreateShortcut('{shortcutPath}')";
+                script += $";$s.TargetPath='{targetPath}'";
+                script += $";$s.Arguments='--autoStart'";
+                script += $";$s.WorkingDirectory='{System.IO.Path.GetDirectoryName(targetPath)}'";
+                script += $";$s.IconLocation='{targetPath}'";
+                script += $";$s.Save()";
+                
+                Process.Start(new ProcessStartInfo {
+                    FileName = "powershell",
+                    Arguments = $"-Command \"{script}\"",
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                });
+            }
+        }
+        else
+        {
+            ApplyHotkey(Assistant.Settings);
+        }
+    }
+    
+    private void OnClickExit()
+    {
+        Application.Current.Shutdown();
     }
 }

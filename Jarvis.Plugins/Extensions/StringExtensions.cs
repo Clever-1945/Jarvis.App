@@ -81,4 +81,15 @@ public static class StringExtensions
 
         return String.Equals(new string(left), right, StringComparison.OrdinalIgnoreCase);
     }
+
+    public static T? ToEnum<T>(this string text) where T : struct
+    {
+        T instance = default(T);
+        if (Enum.TryParse<T>(text, true, out instance))
+        {
+            return instance;
+        }
+
+        return new Nullable<T>();
+    }
 }

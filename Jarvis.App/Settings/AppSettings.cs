@@ -16,6 +16,9 @@ public class AppSettings: IClone<AppSettings>
     /// Показать главное окно при автозапуске
     /// </summary>
     public bool ShowDialogIfAutoStart { set; get; }
+    
+    /// <summary> Горячая клавиша для отображения окна </summary>
+    public string ShowHotKey { set; get; }
 
     /// <summary> Настройки плагинов </summary>
     public AppPluginSettings[] Plugins  { set; get; }
@@ -27,6 +30,7 @@ public class AppSettings: IClone<AppSettings>
             Id = Id,
             AutoStart = this.AutoStart,
             ShowDialogIfAutoStart = this.ShowDialogIfAutoStart,
+            ShowHotKey = this.ShowHotKey,
             Plugins = this.Plugins.CloneArray()
         };
     }

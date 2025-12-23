@@ -3,6 +3,8 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows.Input;
+using Jarvis.App.Definitions;
 using Jarvis.App.Settings;
 using Jarvis.Plugins;
 using LiteDB;
@@ -156,5 +158,44 @@ public static class Assistant
                 db.GetCollection<AppSettings>().Insert(settings);
             }
         }, db);
+    }
+
+    public static HotKeyDefinition GetHotKeyDefinition(Key[] keys)
+    {
+        List<ModifierKeys> hotModifierKeys = new List<ModifierKeys>();
+        List<Key> hotKey = new List<Key>();
+
+        if (keys != null)
+        {
+            foreach (var key in keys)
+            {
+                if (key == Key.LeftCtrl || key == Key.RightCtrl)
+                {
+                    hotModifierKeys.Add(ModifierKeys.Control);
+                }
+                else  if (key == Key.LeftAlt || key == Key.RightAlt)
+                {
+                    hotModifierKeys.Add(ModifierKeys.Alt);
+                }
+                else  if (key == Key.LeftShift || key == Key.RightShift)
+                {
+                    hotModifierKeys.Add(ModifierKeys.Shift);
+                }
+                else  if (key == Key.LWin || key == Key.RWin)
+                {
+                    hotModifierKeys.Add(ModifierKeys.Windows);
+                }
+                else
+                {
+                    hotKey.Add(key);
+                }
+            }
+        }
+
+        return new HotKeyDefinition()
+        {
+            Keys = hotKey.ToArray(),
+            ModifierKeys = hotModifierKeys.ToArray()
+        };
     }
 }

@@ -86,7 +86,6 @@ public static class Assistant
 
             alc.Unload();
         }
-
         _plugins = dictionaryPlugin.Values.ToArray();
     }
 

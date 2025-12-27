@@ -25,7 +25,7 @@ using Path = System.Windows.Shapes.Path;
 namespace Jarvis.App;
 
 
-// тест 112  
+// тест 112 
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml

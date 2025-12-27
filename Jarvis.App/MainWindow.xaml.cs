@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -23,6 +23,9 @@ using MessageBox = System.Windows.MessageBox;
 using Path = System.Windows.Shapes.Path;
 
 namespace Jarvis.App;
+
+
+// тест 112 
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
